@@ -218,45 +218,31 @@
     ].filter(Boolean).join(" · ");
 
     return `
-      <p class="sub">${escapeHtml(cfg.nombre || "Reserva de Suba")}<br>
-      ${escapeHtml(cfg.direccion || "")} · ${escapeHtml(cfg.ciudad || "")}<br>
-      ${contacto}<br>
-      Oficio <strong>${num}</strong> · Queja origen ${escapeHtml(data.radicado_queja || "—")}</p>
+      <p class="sub">${escapeHtml(cfg.nombre || "Reserva de Suba")} · ${escapeHtml(cfg.direccion || "")}<br>
+      Administración: Tel. ${escapeHtml(cfg.telefonoAdmin || "3194090958")} · ${escapeHtml(cfg.emailAdmin || "")}<br>
+      Oficio <strong>${num}</strong> · Queja ${escapeHtml(data.radicado_queja || "—")} · Unidad ${escapeHtml(data.unidad)}${data.tipo_oficio === "sancion" ? " · Acta " + escapeHtml(data.acta_numero || "—") + " del " + fmtFecha(data.acta_fecha) : ""}</p>
       <h1>${escapeHtml(data.tipo_label || "Oficio")}</h1>
       <p>Bogotá D.C., ${fmtFecha(data.fecha_oficio)}</p>
-      <p>Señores<br><strong>${destinatario}</strong><br>${escapeHtml(data.calidad || "")}<br>
-      Parque Residencial Reserva de Suba P.H.</p>
-      <p><strong>Asunto:</strong> ${escapeHtml(data.tipo_label || "Oficio")} — unidad ${escapeHtml(data.unidad)} — radicado ${escapeHtml(data.radicado_queja || "—")}.</p>
+      <p>Señor(es) <strong>${destinatario}</strong>${data.calidad ? " (" + escapeHtml(data.calidad) + ")" : ""}.</p>
+      <p><strong>Asunto:</strong> ${escapeHtml(data.tipo_label || "Oficio")} — unidad ${escapeHtml(data.unidad)}.</p>
       ${data.tipo_oficio === "sancion"
         ? "<p>Se comunica una decisión <strong>ya adoptada por el Consejo de Administración</strong>.</p>"
-        : "<p><strong>Este escrito no impone sanción, multa ni restricción de zonas comunes.</strong></p>"}
-      <h3>I. Identificación</h3>
-      <table>
-        <tr><th>Oficio</th><td>${num}</td></tr>
-        <tr><th>Queja de origen</th><td>${escapeHtml(data.radicado_queja || "—")}</td></tr>
-        <tr><th>Tipo</th><td>${escapeHtml(data.tipo_label || "—")}</td></tr>
-        <tr><th>Unidad</th><td>${escapeHtml(data.unidad)}</td></tr>
-        <tr><th>Destinatario</th><td>${escapeHtml(data.nombre_destinatario || "Quien resida o sea propietario")}</td></tr>
-        <tr><th>Fecha de los hechos</th><td>${fmtFecha(data.fecha_hechos)}</td></tr>
-        <tr><th>Plazo</th><td>${escapeHtml(data.plazo || "—")}</td></tr>
-        ${data.tipo_oficio === "sancion" ? `<tr><th>Acta del Consejo</th><td>${escapeHtml(data.acta_numero || "—")} · ${fmtFecha(data.acta_fecha)}</td></tr>` : ""}
-      </table>
-      <h3>II. Hechos</h3>
-      <p>${escapeHtml(data.hechos || "").replace(/\n/g, "<br>")}</p>
-      <h3>III. Norma</h3>
+        : "<p><strong>Este escrito no impone sanción ni multa.</strong></p>"}
+      <h3>Hechos</h3>
+      <p>${escapeHtml(data.hechos || "").replace(/\n/g, "<br>")}${data.fecha_hechos ? " (Fecha de los hechos: " + fmtFecha(data.fecha_hechos) + ".)" : ""}</p>
+      <h3>Norma</h3>
       <p>${escapeHtml(norma || "—")}</p>
-      <h3>IV. Pruebas</h3>
+      <h3>Pruebas</h3>
       <p>${escapeHtml(data.pruebas || "Las que obran en el expediente y las que se anexan.")}</p>
       ${fotosHTML()}
-      <h3>V. Lo que se comunica</h3>
+      <h3>Lo que se comunica</h3>
       ${parrafosSegunTipo(data, num)}
-      <p><strong>Lo que se pide:</strong> ${escapeHtml(data.pedido || "—")}</p>
-      <p><strong>Medio de respuesta:</strong> ${escapeHtml(data.medio_respuesta || contacto || "")}</p>
-      <h3>VI. Reserva y datos</h3>
-      <p>${reserva} Uso exclusivo de este trámite (Ley 1581 de 2012).</p>
+      <p><strong>Se pide:</strong> ${escapeHtml(data.pedido || "—")} · <strong>Plazo:</strong> ${escapeHtml(data.plazo || "—")}</p>
+      <p><strong>Respuesta:</strong> ${escapeHtml(data.medio_respuesta || contacto || "")}</p>
+      <p class="sub">${reserva}</p>
       <table class="firma"><tbody><tr>
         <td><div class="linea">Quien suscribe<br>${escapeHtml(data.firmante)}<br>${escapeHtml(data.cargo)}</div></td>
-        <td><div class="linea">Recibido por el destinatario<br>Nombre, documento, fecha y firma</div></td>
+        <td><div class="linea">Recibido<br>Nombre, documento, fecha y firma</div></td>
       </tr></tbody></table>
     `;
   }
@@ -277,7 +263,7 @@
 </xml>
 <![endif]-->
 <style>
-  @page { size: 8.5in 11in; margin: 1in 1in 1in 1in; }
+  @page { size: 8.5in 11in; margin: 0.6in; }
   * { box-sizing: border-box; }
   body { font-family: Calibri, Arial, sans-serif; font-size: 11.5pt; color: #111827; line-height: 1.42; margin: 0; text-align: justify; }
   h1 { font-size: 15pt; margin: 10pt 0 10pt; text-align: left; }
@@ -310,13 +296,37 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   }
 
+  function hojaEstilos() {
+    return `@page { size: letter; margin: 0.6in; }
+      html, body { margin: 0; padding: 0; background: #fff; }
+      body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #111; line-height: 1.35; }
+      h1 { font-size: 14pt; margin: 6pt 0 8pt; }
+      h3 { font-size: 11pt; margin: 10pt 0 4pt; border-top: 1px solid #ccc; padding-top: 6pt; }
+      p { margin: 0 0 6pt; }
+      .sub { font-size: 9pt; color: #444; margin: 0 0 8pt; line-height: 1.4; }
+      .fotos-pagina { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
+      .fotos-pagina td.foto-celda { width: 50%; padding: 4pt; text-align: center; vertical-align: top; }
+      .fotos-pagina img { display: block; margin: 0 auto; width: 240px; height: 160px; object-fit: cover; }
+      .foto-titulo { font-size: 10pt; font-weight: 700; margin: 4pt 0; }
+      .foto-pie { margin: 2pt 0 0; font-size: 8pt; color: #555; }
+      table.firma { width: 100%; border: none; margin-top: 18pt; page-break-inside: avoid; }
+      table.firma td { border: none; width: 50%; padding: 0 12pt 0 0; vertical-align: top; }
+      table.firma .linea { border-top: 1px solid #111; padding-top: 4pt; font-size: 9pt; }`;
+  }
+
   function downloadPDF() {
-    /* Usa la función nativa "Imprimir" del navegador: en el diálogo que se
-       abre, el usuario elige "Guardar como PDF" (o "Microsoft Print to PDF"
-       en Windows) como destino. Solo se imprime el oficio (ver la regla
-       @media print de styles.css), no el resto de la página. Esto evita
-       depender de una librería externa que a veces entregaba PDF en blanco. */
-    window.print();
+    const payload = $("modal").dataset.payload;
+    if (!payload) { window.print(); return; }
+    const { data, num } = JSON.parse(payload);
+    const w = window.open("", "_blank");
+    if (!w) { window.print(); return; }
+    w.document.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${num}</title>
+      <style>${hojaEstilos()}</style></head>
+      <body>${buildDocumento(data, num)}</body></html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); }, 400);
   }
 
   function openModal(data, num) {
