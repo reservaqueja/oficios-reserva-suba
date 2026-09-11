@@ -310,41 +310,13 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   }
 
-  function elementoParaPDF(data, num) {
-    const el = document.createElement("div");
-    el.className = "documento";
-    el.style.border = "none";
-    el.style.padding = "34px 40px";
-    el.style.width = "700px";
-    el.style.background = "#ffffff";
-    el.style.position = "fixed";
-    el.style.left = "-9999px";
-    el.style.top = "0";
-    el.innerHTML = buildDocumento(data, num);
-    return el;
-  }
-
-  function downloadPDF(data, num) {
-    if (typeof html2pdf === "undefined") {
-      alert("No se pudo cargar el generador de PDF. Verifique la conexión a internet e inténtelo de nuevo.");
-      return Promise.resolve();
-    }
-    const el = elementoParaPDF(data, num);
-    document.body.appendChild(el);
-    const nombreArchivo = num + " — " + (data.unidad || "oficio") + ".pdf";
-    return html2pdf()
-      .set({
-        margin: 0.8,
-        filename: nombreArchivo,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-        pagebreak: { mode: ["css", "avoid-all"] }
-      })
-      .from(el)
-      .save()
-      .then(() => { el.remove(); })
-      .catch((err) => { el.remove(); throw err; });
+  function downloadPDF() {
+    /* Usa la función nativa "Imprimir" del navegador: en el diálogo que se
+       abre, el usuario elige "Guardar como PDF" (o "Microsoft Print to PDF"
+       en Windows) como destino. Solo se imprime el oficio (ver la regla
+       @media print de styles.css), no el resto de la página. Esto evita
+       depender de una librería externa que a veces entregaba PDF en blanco. */
+    window.print();
   }
 
   function openModal(data, num) {
@@ -455,17 +427,7 @@
   });
 
   $("pdfBtn").addEventListener("click", () => {
-    const raw = $("modal").dataset.payload;
-    if (!raw) return;
-    const { data, num } = JSON.parse(raw);
-    const btn = $("pdfBtn");
-    const textoOriginal = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Generando PDF…";
-    downloadPDF(data, num).finally(() => {
-      btn.disabled = false;
-      btn.textContent = textoOriginal;
-    });
+    downloadPDF();
   });
 
   applyConfig();
