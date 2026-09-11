@@ -41,7 +41,8 @@ a { color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
 .brand img { height: 34px; background: #fff; border-radius: 8px; padding: 3px; }
 .brand-text { font-size: 13px; font-weight: 600; line-height: 1.2; }
-.top-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.top-actions { margin-left: auto; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.top-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 10px 16px; border-radius: 999px; border: 1px solid transparent;
