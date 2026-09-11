@@ -16,7 +16,7 @@
     <form class="gate-card" id="loginForm">
       <img src="logo.png" alt="Reserva de Suba" />
       <h1>Oficios internos</h1>
-      <p>Acceso de administración y Consejo. Usuario: admin · Clave: Oficios26. No la comparta con residentes.</p>
+      <p>Acceso de administración.</p>
       <label>Usuario
         <input name="usuario" id="loginUser" autocomplete="username" required />
       </label>
@@ -45,7 +45,7 @@
     <section class="hero wrap" id="inicio">
       <p class="cite">Uso interno</p>
       <h1>Elabore el oficio al vecino reportado.</h1>
-      <p>Después de la queja: llamado, descargos, citación, archivo o comunicación de una sanción que ya decidió el Consejo. Descargue Word o ábralo en el correo del destinatario.</p>
+      <p>Después de la queja: llamado, descargos, citación, archivo o comunicación de una sanción que ya decidió el Consejo. Descargue el oficio en Word o en PDF.</p>
     </section>
 
     <section class="wrap section" id="formulario">
@@ -186,14 +186,14 @@
       <h2 id="modalTitle">Oficio</h2>
       <div class="doc-toolbar">
         <button class="btn btn-sm" id="wordBtn">Descargar Word</button>
-        <a class="btn btn-outline btn-sm" id="mailInfractorBtn">Abrir correo al destinatario</a>
+        <button class="btn btn-outline btn-sm" id="pdfBtn">Descargar PDF</button>
       </div>
       <article class="documento" id="documento"></article>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-
