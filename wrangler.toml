@@ -1,0 +1,5 @@
+name = "oficios-reserva-suba"
+compatibility_date = "2026-09-10"
+
+[assets]
+directory = "."
