@@ -8,7 +8,6 @@ window.CONJUNTO_CONFIG = {
   horarioAtencion: "Lunes a viernes, 8:00 a.m. a 5:00 p.m.",
   urlQuejas: "https://quejas-reserva-de-suba.reservadesubaque.workers.dev",
   urlPublica: "https://requerimientos-reserva-de-suba.reservadesubaque.workers.dev",
-  asuntoCorreo: "Oficio — Reserva de Suba",
 
   /* Cambie esta clave y haga push. No la publique en grupos de residentes. */
   accesoClave: "Oficios26",
