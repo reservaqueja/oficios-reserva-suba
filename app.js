@@ -3,6 +3,19 @@
   const fotos = [];
   const SESSION = "rs_oficios_ok";
 
+  const TEMAS = {
+    ruido: "Manual de Convivencia 2020 — ruido. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    mascotas: "Manual de Convivencia 2020 — mascotas. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    parqueadero: "Manual de Convivencia 2020 — parqueadero / visitantes. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    balcones: "Manual de Convivencia 2020 — balcones, ventanas y fachada. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    zonas: "Manual de Convivencia 2020 — zonas comunes. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    aseo: "Manual de Convivencia 2020 — aseo y basuras. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    obras: "Manual de Convivencia 2020 — obras y modificaciones. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    convivencia: "Manual de Convivencia 2020 — convivencia / irrespeto. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    seguridad: "Manual de Convivencia 2020 — seguridad y acceso. Trámite: Manual art. 133 y Ley 675 arts. 59 y 60.",
+    otro: "Norma del Manual de Convivencia 2020 o del reglamento (escritura 176 de 2016). Trámite: art. 133 y Ley 675 arts. 59 y 60."
+  };
+
   const TIPOS = [
     { id: "llamado", tag: "OF-01", titulo: "Llamado de atención escrito", desc: "Constancia. No es sanción.", plazoDefault: "No aplica — se deja constancia" },
     { id: "descargos", tag: "OF-02", titulo: "Requerimiento de descargos", desc: "8 días calendario.", plazoDefault: "Ocho (8) días calendario desde la notificación" },
@@ -93,8 +106,14 @@
     if (!fotos.length) {
       return "<p>No se insertaron fotografías. Si existen, se anexan en físico o por correo citando este oficio.</p>";
     }
-    return `<div class="pruebas-doc count-${fotos.length}">${fotos.map((f, i) =>
-      `<img src="${f.src}" alt="Prueba ${i + 1}" />`).join("")}</div>`;
+    let cells = "";
+    for (let i = 0; i < fotos.length; i++) {
+      if (i % 2 === 0) cells += "<tr>";
+      cells += `<td><img src="${fotos[i].src}" alt="Prueba ${i + 1}" /></td>`;
+      if (i % 2 === 1) cells += "</tr>";
+    }
+    if (fotos.length % 2 === 1) cells += "<td></td></tr>";
+    return `<table class="fotos-pagina">${cells}</table>`;
   }
 
   function parrafosSegunTipo(data, num) {
@@ -129,7 +148,8 @@
     const reserva = data.reserva_quejoso
       ? "El presentante solicitó reserva de identidad. Este oficio no revela su nombre."
       : "La identidad del presentante, si consta, solo se usa en el expediente interno.";
-    const norma = [data.norma, data.norma_detalle].filter(Boolean).join(" — ");
+    const cita = TEMAS[data.norma] || data.norma || "—";
+    const norma = [cita, data.norma_detalle].filter(Boolean).join(" — ");
 
     return `
       <p class="sub">${escapeHtml(cfg.nombre || "Reserva de Suba")}<br>
@@ -189,8 +209,9 @@
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #ccc; padding: 6px 8px; }
         th { width: 34%; background: #f4f4f4; text-align: left; }
-        .pruebas-doc { width: 100%; }
-        .pruebas-doc img { width: 48%; height: 180px; object-fit: cover; margin: 4px 1%; }
+        .fotos-pagina { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
+        .fotos-pagina td { width: 50%; padding: 4px; vertical-align: top; }
+        .fotos-pagina img { width: 320px; height: 200px; object-fit: cover; display: block; }
         .sub { font-size: 9pt; color: #555; }
       </style></head><body>${inner}</body></html>`;
     const blob = new Blob(["\ufeff", html], { type: "application/msword" });
