@@ -145,20 +145,15 @@ table.firma td { border: none; padding: 0 20px 0 0; vertical-align: top; width: 
   .grid-2, .legal-grid, .fotos-grid { grid-template-columns: 1fr 1fr; }
 }
 @media print {
-  @page { size: letter; margin: 1in; }
-  body * { visibility: hidden !important; }
-  #modal, #modal #documento, #modal #documento * { visibility: visible !important; }
-  .modal-backdrop, .modal-close, .doc-toolbar, .pdf-ayuda, .top, .gate { display: none !important; }
-  .modal { position: static; }
-  .modal-panel { position: static; margin: 0; padding: 0; width: auto; max-height: none; overflow: visible; box-shadow: none; }
-  #documento {
-    border: none; padding: 0; font-size: 12pt; line-height: 1.42;
-    text-align: justify; color: #000;
-  }
-  #documento h1 { font-size: 16pt; text-align: left; break-after: avoid; }
-  #documento h3 { font-size: 13pt; text-align: left; break-after: avoid; }
-  #documento .sub { text-align: left; }
-  #documento table { break-inside: avoid; }
-  #documento .fotos-pagina { break-inside: avoid; }
-  #documento table.firma { break-inside: avoid; }
+  @page { size: letter; margin: 0.6in; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+  body * { display: none !important; }
+  #modal, #modal .modal-panel, #modal #documento, #modal #documento * { display: block !important; }
+  #modal #documento table { display: table !important; }
+  #modal #documento tbody { display: table-row-group !important; }
+  #modal #documento tr { display: table-row !important; }
+  #modal #documento td, #modal #documento th { display: table-cell !important; }
+  .modal-backdrop, .modal-close, .doc-toolbar, .pdf-ayuda, .top, .gate, .app { display: none !important; }
+  .modal, .modal-panel { position: static !important; margin: 0 !important; padding: 0 !important; width: auto !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; background: #fff !important; }
+  #documento { border: none !important; padding: 0 !important; font-size: 11pt !important; }
 }
