@@ -124,6 +124,7 @@ textarea { min-height: 88px; resize: vertical; }
   width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer;
 }
 .doc-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 14px; }
+.pdf-ayuda { margin: -8px 0 14px; font-size: 12px; color: var(--mute); }
 .documento { border: 1px solid var(--line); padding: 28px; font-size: 14px; }
 .documento h1 { font-size: 1.2rem; margin: 8px 0 12px; }
 .documento .sub { font-size: 12px; color: var(--mute); line-height: 1.5; }
@@ -142,11 +143,22 @@ table.firma td { border: none; padding: 0 20px 0 0; vertical-align: top; width: 
 
 @media (max-width: 720px) {
   .grid-2, .legal-grid, .fotos-grid { grid-template-columns: 1fr 1fr; }
-  .firma { grid-template-columns: 1fr; }
 }
 @media print {
+  @page { size: letter; margin: 1in; }
   body * { visibility: hidden !important; }
   #modal, #modal #documento, #modal #documento * { visibility: visible !important; }
-  .modal-backdrop, .modal-close, .doc-toolbar, .top, .gate { display: none !important; }
-  .modal-panel { margin: 0; width: auto; max-height: none; box-shadow: none; }
+  .modal-backdrop, .modal-close, .doc-toolbar, .pdf-ayuda, .top, .gate { display: none !important; }
+  .modal { position: static; }
+  .modal-panel { position: static; margin: 0; padding: 0; width: auto; max-height: none; overflow: visible; box-shadow: none; }
+  #documento {
+    border: none; padding: 0; font-size: 12pt; line-height: 1.42;
+    text-align: justify; color: #000;
+  }
+  #documento h1 { font-size: 16pt; text-align: left; break-after: avoid; }
+  #documento h3 { font-size: 13pt; text-align: left; break-after: avoid; }
+  #documento .sub { text-align: left; }
+  #documento table { break-inside: avoid; }
+  #documento .fotos-pagina { break-inside: avoid; }
+  #documento table.firma { break-inside: avoid; }
 }
