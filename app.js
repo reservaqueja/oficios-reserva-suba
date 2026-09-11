@@ -261,12 +261,6 @@
     `;
   }
 
-  function textoPlano(data, num) {
-    const div = document.createElement("div");
-    div.innerHTML = buildDocumento(data, num);
-    return div.innerText.replace(/\n{3,}/g, "\n\n");
-  }
-
   function downloadWord(data, num) {
     const inner = buildDocumento(data, num);
     const html = `<!DOCTYPE html>
@@ -316,10 +310,41 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   }
 
-  function mailto(to, subject, body) {
-    return "mailto:" + encodeURIComponent(to || "") +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body.slice(0, 1800));
+  function elementoParaPDF(data, num) {
+    const el = document.createElement("div");
+    el.className = "documento";
+    el.style.border = "none";
+    el.style.padding = "34px 40px";
+    el.style.width = "700px";
+    el.style.background = "#ffffff";
+    el.style.position = "fixed";
+    el.style.left = "-9999px";
+    el.style.top = "0";
+    el.innerHTML = buildDocumento(data, num);
+    return el;
+  }
+
+  function downloadPDF(data, num) {
+    if (typeof html2pdf === "undefined") {
+      alert("No se pudo cargar el generador de PDF. Verifique la conexión a internet e inténtelo de nuevo.");
+      return Promise.resolve();
+    }
+    const el = elementoParaPDF(data, num);
+    document.body.appendChild(el);
+    const nombreArchivo = num + " — " + (data.unidad || "oficio") + ".pdf";
+    return html2pdf()
+      .set({
+        margin: 0.8,
+        filename: nombreArchivo,
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        pagebreak: { mode: ["css", "avoid-all"] }
+      })
+      .from(el)
+      .save()
+      .then(() => { el.remove(); })
+      .catch((err) => { el.remove(); throw err; });
   }
 
   function openModal(data, num) {
@@ -327,15 +352,6 @@
     $("modalTitle").textContent = (data.tipo_label || "Oficio") + " · " + num;
     $("modal").hidden = false;
     $("modal").dataset.payload = JSON.stringify({ data, num });
-    const asunto = (cfg.asuntoCorreo || "Oficio Reserva de Suba") + " " + num + " — " + (data.unidad || "");
-    const btnI = $("mailInfractorBtn");
-    if (data.email_destinatario) {
-      btnI.href = mailto(data.email_destinatario, asunto, textoPlano(data, num));
-      btnI.style.display = "";
-    } else {
-      btnI.removeAttribute("href");
-      btnI.style.display = "none";
-    }
   }
 
   function readFotos(files) {
@@ -438,8 +454,21 @@
     downloadWord(data, num);
   });
 
+  $("pdfBtn").addEventListener("click", () => {
+    const raw = $("modal").dataset.payload;
+    if (!raw) return;
+    const { data, num } = JSON.parse(raw);
+    const btn = $("pdfBtn");
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Generando PDF…";
+    downloadPDF(data, num).finally(() => {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    });
+  });
+
   applyConfig();
   renderTipos();
   showApp(unlocked());
 })();
-
