@@ -16,7 +16,7 @@
     <form class="gate-card" id="loginForm">
       <img src="logo.png" alt="Reserva de Suba" />
       <h1>Oficios internos</h1>
-      <p>Acceso de administración y Consejo. El residente no usa esta página.</p>
+      <p>Acceso de administración y Consejo. Usuario: admin · Clave: Oficios26. No la comparta con residentes.</p>
       <label>Usuario
         <input name="usuario" id="loginUser" autocomplete="username" required />
       </label>
@@ -101,40 +101,27 @@
         </fieldset>
 
         <fieldset>
-          <legend>3. Hechos y norma</legend>
+          <legend>3. Hechos y tema</legend>
           <label>Hechos *<textarea name="hechos" required rows="5"></textarea></label>
           <div class="grid-2">
-            <label>Norma que se cita *
+            <label>De qué se trata *
               <select name="norma" required>
                 <option value="">Seleccione</option>
-                <optgroup label="Conducta (qué se imputa)">
-                  <option>Manual de Convivencia 2020 — ruido</option>
-                  <option>Manual de Convivencia 2020 — mascotas</option>
-                  <option>Manual de Convivencia 2020 — parqueadero / visitantes</option>
-                  <option>Manual de Convivencia 2020 — balcones, ventanas y fachada</option>
-                  <option>Manual de Convivencia 2020 — zonas comunes</option>
-                  <option>Manual de Convivencia 2020 — aseo y basuras</option>
-                  <option>Manual de Convivencia 2020 — obras y modificaciones</option>
-                  <option>Manual de Convivencia 2020 — convivencia / irrespeto</option>
-                  <option>Manual de Convivencia 2020 — seguridad y acceso</option>
-                  <option>Manual de Convivencia 2020, capítulo XIX (sanciones)</option>
-                  <option>Escritura 176 de 2016, art. 99 (conductas / ser oído)</option>
-                </optgroup>
-                <optgroup label="Trámite (cómo se sigue el proceso)">
-                  <option>Manual de Convivencia 2020, art. 133 (llamado y procedimiento)</option>
-                  <option>Manual de Convivencia 2020, art. 134</option>
-                  <option>RPH escritura 176, art. 96 (Comité; no sanciona)</option>
-                  <option>RPH escritura 176, arts. 97 y 98 (quién impone)</option>
-                  <option>RPH escritura 176, art. 100 (administrador ejecuta)</option>
-                  <option>RPH escritura 176, art. 101 (recursos)</option>
-                  <option>Ley 675 de 2001, art. 58 (Comité)</option>
-                  <option>Ley 675 de 2001, arts. 59 y 60 (sanción y descargos)</option>
-                  <option>Otra (indíquela en el recuadro siguiente)</option>
-                </optgroup>
+                <option value="ruido">Ruido</option>
+                <option value="mascotas">Mascotas</option>
+                <option value="parqueadero">Parqueadero / visitantes</option>
+                <option value="balcones">Balcones, ropa y objetos</option>
+                <option value="zonas">Zonas comunes</option>
+                <option value="aseo">Aseo y basuras</option>
+                <option value="obras">Obras y fachada</option>
+                <option value="convivencia">Irrespeto / convivencia</option>
+                <option value="seguridad">Seguridad y portería</option>
+                <option value="otro">Otro</option>
               </select>
             </label>
-            <label>Artículo o capítulo concreto<input name="norma_detalle" placeholder="Ej. cap. XIX, art. 134" /></label>
+            <label>Detalle (opcional)<input name="norma_detalle" placeholder="Si quiere: art. 134, torre, etc." /></label>
           </div>
+          <p class="fine">El oficio escribe solo la norma. Usted solo elige el tema.</p>
           <label>Qué se pide en esta etapa
             <select name="pedido">
               <option value="Enmendar la conducta y dejar constancia en la carpeta de la unidad">Enmendar y dejar constancia</option>
@@ -154,7 +141,7 @@
         </fieldset>
 
         <fieldset>
-          <legend>4. Fotos (máx. 4, mismo tamaño, una hoja)</legend>
+          <legend>4. Fotos (hasta 4, una sola hoja)</legend>
           <label>Pruebas escritas<textarea name="pruebas" rows="2" placeholder="Minuta, Drive, etc."></textarea></label>
           <label>Imágenes<input type="file" id="fotos" accept="image/*" multiple /></label>
           <div class="fotos-grid" id="fotosGrid"></div>
@@ -209,3 +196,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
