@@ -13,3 +13,4 @@ window.CONJUNTO_CONFIG = {
   accesoClave: "Oficios26",
   accesoUsuario: "admin"
 };
+
