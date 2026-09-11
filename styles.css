@@ -150,4 +150,3 @@ table.firma td { border: none; padding: 0 20px 0 0; vertical-align: top; width: 
   .modal-backdrop, .modal-close, .doc-toolbar, .top, .gate { display: none !important; }
   .modal-panel { margin: 0; width: auto; max-height: none; box-shadow: none; }
 }
-
