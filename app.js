@@ -56,7 +56,14 @@
             sx = 0;
             sy = (img.height - sh) / 2;
           }
-          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, anchoDestino, altoDestino);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, anchoDestino, altoDestino);
+          const escala = Math.min(anchoDestino / img.width, altoDestino / img.height);
+          const dw = img.width * escala;
+          const dh = img.height * escala;
+          const dx = (anchoDestino - dw) / 2;
+          const dy = (altoDestino - dh) / 2;
+          ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
           URL.revokeObjectURL(url);
           resolve(canvas.toDataURL("image/jpeg", calidad || 0.85));
         } catch (err) {
@@ -306,7 +313,7 @@
       .sub { font-size: 9pt; color: #444; margin: 0 0 8pt; line-height: 1.4; }
       .fotos-pagina { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
       .fotos-pagina td.foto-celda { width: 50%; padding: 4pt; text-align: center; vertical-align: top; }
-      .fotos-pagina img { display: block; margin: 0 auto; width: 240px; height: 160px; object-fit: cover; }
+      .fotos-pagina img { display: block; margin: 0 auto; width: 240px; height: 160px; object-fit: contain; background: #fff; }
       .foto-titulo { font-size: 10pt; font-weight: 700; margin: 4pt 0; }
       .foto-pie { margin: 2pt 0 0; font-size: 8pt; color: #555; }
       table.firma { width: 100%; border: none; margin-top: 18pt; page-break-inside: avoid; }
