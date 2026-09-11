@@ -11,6 +11,6 @@ window.CONJUNTO_CONFIG = {
   asuntoCorreo: "Oficio — Reserva de Suba",
 
   /* Cambie esta clave y haga push. No la publique en grupos de residentes. */
-  accesoClave: "ReservaOficios2026",
-  accesoUsuario: "administracion"
+  accesoClave: "Oficios26",
+  accesoUsuario: "admin"
 };
