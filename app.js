@@ -24,6 +24,51 @@
     { id: "sancion", tag: "OF-05", titulo: "Comunicación de sanción del Consejo", desc: "Solo si ya hay acta.", plazoDefault: "Tres (3) días hábiles para reposición" }
   ];
 
+  /* Tamaño fijo de cada foto dentro del Word (proporción 3:2).
+     Al recortar y redimensionar aquí mismo, cada imagen queda ya
+     con el tamaño exacto en píxeles, así Word la muestra igual
+     sin importar la resolución original de la foto (Word ignora
+     "object-fit" y otras propiedades CSS modernas). */
+  const FOTO_ANCHO_PX = 298; // ≈ 3.1 in a 96 dpi
+  const FOTO_ALTO_PX = 199;  // ≈ 2.07 in a 96 dpi
+
+  function recortarImagen(file, anchoDestino, altoDestino, calidad) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = anchoDestino;
+          canvas.height = altoDestino;
+          const ctx = canvas.getContext("2d");
+          const relOrigen = img.width / img.height;
+          const relDestino = anchoDestino / altoDestino;
+          let sx, sy, sw, sh;
+          if (relOrigen > relDestino) {
+            sh = img.height;
+            sw = sh * relDestino;
+            sx = (img.width - sw) / 2;
+            sy = 0;
+          } else {
+            sw = img.width;
+            sh = sw / relDestino;
+            sx = 0;
+            sy = (img.height - sh) / 2;
+          }
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, anchoDestino, altoDestino);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/jpeg", calidad || 0.85));
+        } catch (err) {
+          URL.revokeObjectURL(url);
+          reject(err);
+        }
+      };
+      img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+      img.src = url;
+    });
+  }
+
   const $ = (id) => document.getElementById(id);
 
   function unlocked() {
@@ -37,6 +82,15 @@
 
   function applyConfig() {
     if ($("footerName")) $("footerName").textContent = cfg.nombre || "Reserva de Suba";
+    const fc = $("footerContacto");
+    if (fc) {
+      const partes = [
+        cfg.telefonoAdmin ? "Tel. administración: " + cfg.telefonoAdmin : "",
+        cfg.emailAdmin || "",
+        cfg.horarioAtencion || ""
+      ].filter(Boolean);
+      fc.textContent = partes.join(" · ");
+    }
     const q = $("btnQuejas");
     if (q) q.href = cfg.urlQuejas || "#";
     const f = document.querySelector('input[name="fecha_oficio"]');
@@ -106,14 +160,21 @@
     if (!fotos.length) {
       return "<p>No se insertaron fotografías. Si existen, se anexan en físico o por correo citando este oficio.</p>";
     }
-    let cells = "";
-    for (let i = 0; i < fotos.length; i++) {
-      if (i % 2 === 0) cells += "<tr>";
-      cells += `<td><img src="${fotos[i].src}" alt="Prueba ${i + 1}" /></td>`;
-      if (i % 2 === 1) cells += "</tr>";
+    let filas = "";
+    for (let i = 0; i < 4; i += 2) {
+      const a = fotos[i];
+      const b = fotos[i + 1];
+      if (!a && !b) break;
+      filas += "<tr>";
+      filas += a
+        ? `<td class="foto-celda"><img src="${a.src}" width="${FOTO_ANCHO_PX}" height="${FOTO_ALTO_PX}" alt="Prueba ${i + 1}" /><p class="foto-pie">Prueba ${i + 1}</p></td>`
+        : `<td class="foto-celda">&nbsp;</td>`;
+      filas += b
+        ? `<td class="foto-celda"><img src="${b.src}" width="${FOTO_ANCHO_PX}" height="${FOTO_ALTO_PX}" alt="Prueba ${i + 2}" /><p class="foto-pie">Prueba ${i + 2}</p></td>`
+        : `<td class="foto-celda">&nbsp;</td>`;
+      filas += "</tr>";
     }
-    if (fotos.length % 2 === 1) cells += "<td></td></tr>";
-    return `<table class="fotos-pagina">${cells}</table>`;
+    return `<p class="foto-titulo">Registro fotográfico (anexo)</p><table class="fotos-pagina"><tbody>${filas}</tbody></table>`;
   }
 
   function parrafosSegunTipo(data, num) {
@@ -151,9 +212,15 @@
     const cita = TEMAS[data.norma] || data.norma || "—";
     const norma = [cita, data.norma_detalle].filter(Boolean).join(" — ");
 
+    const contacto = [
+      cfg.telefonoAdmin ? "Tel. " + escapeHtml(cfg.telefonoAdmin) : "",
+      escapeHtml(cfg.emailAdmin || "")
+    ].filter(Boolean).join(" · ");
+
     return `
       <p class="sub">${escapeHtml(cfg.nombre || "Reserva de Suba")}<br>
       ${escapeHtml(cfg.direccion || "")} · ${escapeHtml(cfg.ciudad || "")}<br>
+      ${contacto}<br>
       Oficio <strong>${num}</strong> · Queja origen ${escapeHtml(data.radicado_queja || "—")}</p>
       <h1>${escapeHtml(data.tipo_label || "Oficio")}</h1>
       <p>Bogotá D.C., ${fmtFecha(data.fecha_oficio)}</p>
@@ -184,13 +251,13 @@
       <h3>V. Lo que se comunica</h3>
       ${parrafosSegunTipo(data, num)}
       <p><strong>Lo que se pide:</strong> ${escapeHtml(data.pedido || "—")}</p>
-      <p><strong>Medio de respuesta:</strong> ${escapeHtml(data.medio_respuesta || cfg.emailAdmin || "")}</p>
+      <p><strong>Medio de respuesta:</strong> ${escapeHtml(data.medio_respuesta || contacto || "")}</p>
       <h3>VI. Reserva y datos</h3>
       <p>${reserva} Uso exclusivo de este trámite (Ley 1581 de 2012).</p>
-      <div class="firma">
-        <div><div class="linea">Quien suscribe<br>${escapeHtml(data.firmante)}<br>${escapeHtml(data.cargo)}</div></div>
-        <div><div class="linea">Recibido por el destinatario<br>Nombre, documento, fecha y firma</div></div>
-      </div>
+      <table class="firma"><tbody><tr>
+        <td><div class="linea">Quien suscribe<br>${escapeHtml(data.firmante)}<br>${escapeHtml(data.cargo)}</div></td>
+        <td><div class="linea">Recibido por el destinatario<br>Nombre, documento, fecha y firma</div></td>
+      </tr></tbody></table>
     `;
   }
 
@@ -202,18 +269,45 @@
 
   function downloadWord(data, num) {
     const inner = buildDocumento(data, num);
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${num}</title>
-      <style>
-        body { font-family: Calibri, Arial, sans-serif; font-size: 12pt; }
-        h1 { font-size: 16pt; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 6px 8px; }
-        th { width: 34%; background: #f4f4f4; text-align: left; }
-        .fotos-pagina { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
-        .fotos-pagina td { width: 50%; padding: 4px; vertical-align: top; }
-        .fotos-pagina img { width: 320px; height: 200px; object-fit: cover; display: block; }
-        .sub { font-size: 9pt; color: #555; }
-      </style></head><body>${inner}</body></html>`;
+    const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>${num}</title>
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Print</w:View>
+    <w:DoNotOptimizeForBrowser/>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page { size: 8.5in 11in; margin: 1in 1in 1in 1in; }
+  * { box-sizing: border-box; }
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11.5pt; color: #111827; line-height: 1.42; margin: 0; text-align: justify; }
+  h1 { font-size: 15pt; margin: 10pt 0 10pt; text-align: left; }
+  h3 { font-size: 12pt; margin: 16pt 0 6pt; border-top: 1px solid #cbd5e1; padding-top: 8pt; text-align: left; }
+  p { margin: 0 0 8pt; }
+  strong { color: #111827; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 12pt; }
+  th, td { border: 1px solid #c7ccd4; padding: 6pt 8pt; font-size: 10.5pt; text-align: left; vertical-align: top; }
+  th { width: 34%; background: #f4f4f5; font-weight: 700; }
+  .sub { font-size: 9pt; color: #555; margin: 0 0 12pt; text-align: left; line-height: 1.5; }
+  .foto-titulo { font-size: 10.5pt; font-weight: 700; margin: 4pt 0 4pt; text-align: left; }
+  .fotos-pagina { width: 100%; border-collapse: collapse; page-break-inside: avoid; margin: 0 0 12pt; }
+  .fotos-pagina td.foto-celda { width: 50%; padding: 6pt; text-align: center; vertical-align: top; }
+  .fotos-pagina img { display: block; margin: 0 auto 4pt; border: 1px solid #cbd5e1; }
+  .foto-pie { margin: 0; font-size: 9pt; color: #555; text-align: center; }
+  table.firma { border: none; margin-top: 30pt; page-break-inside: avoid; }
+  table.firma td { border: none; padding: 0 14pt 0 0; width: 50%; vertical-align: top; text-align: left; }
+  table.firma .linea { border-top: 1px solid #111827; padding-top: 6pt; font-size: 10pt; }
+</style>
+</head>
+<body>
+<div class="WordSection1">${inner}</div>
+</body>
+</html>`;
     const blob = new Blob(["\ufeff", html], { type: "application/msword" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -245,11 +339,19 @@
   }
 
   function readFotos(files) {
-    Array.from(files || []).slice(0, 4 - fotos.length).forEach((file) => {
-      if (!file.type.startsWith("image/")) return;
-      const reader = new FileReader();
-      reader.onload = () => { fotos.push({ name: file.name, src: reader.result }); renderFotos(); };
-      reader.readAsDataURL(file);
+    const disponibles = 4 - fotos.length;
+    if (disponibles <= 0) {
+      alert("Ya hay 4 fotografías. Quite alguna para agregar otra.");
+      return;
+    }
+    const validas = Array.from(files || []).filter((f) => f.type.startsWith("image/"));
+    if (validas.length > disponibles) {
+      alert("Máximo 4 fotografías por oficio. Se tomarán solo las primeras " + disponibles + ".");
+    }
+    validas.slice(0, disponibles).forEach((file) => {
+      recortarImagen(file, FOTO_ANCHO_PX * 3, FOTO_ALTO_PX * 3, 0.85)
+        .then((dataUrl) => { fotos.push({ name: file.name, src: dataUrl }); renderFotos(); })
+        .catch(() => alert("No se pudo procesar la imagen \"" + file.name + "\". Intente con otra foto."));
     });
   }
 
@@ -340,3 +442,4 @@
   renderTipos();
   showApp(unlocked());
 })();
+
